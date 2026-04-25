@@ -1,0 +1,13 @@
+[
+  {
+    "model": "materials.lesson",
+    "pk": 1,
+    "fields": {
+      "title": "Введение в Python",
+      "description": "Первый урок курса",
+      "preview": null,
+      "video_url": "https://youtube.com",
+      "course": 1
+    }
+  }
+]

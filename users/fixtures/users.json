@@ -1,0 +1,16 @@
+[
+  {
+    "model": "users.user",
+    "pk": 1,
+    "fields": {
+      "email": "test@test.com",
+      "password": "pbkdf2_sha256$test",
+      "phone": "+79001234567",
+      "city": "Москва",
+      "avatar": null,
+      "is_active": true,
+      "is_staff": false,
+      "is_superuser": false
+    }
+  }
+]
