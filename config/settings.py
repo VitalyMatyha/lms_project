@@ -2,11 +2,12 @@ from pathlib import Path
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
+# Явно указываем путь к .env файлу
+load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / '.env')
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = 'django-insecure-gb1o@4(_cac56)ev_@b-(us!jt2_)t_4&5e3$59_te1()z_7by'
 
 DEBUG = True
 
