@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from .models import Course, Lesson, Subscription
-
+from .paginators import MaterialsPagination
 
 class CourseViewSet(viewsets.ModelViewSet):
     """
@@ -105,3 +105,21 @@ class SubscriptionView(APIView):
             message = 'подписка добавлена'
 
         return Response({"message": message})
+
+
+class CourseViewSet(viewsets.ModelViewSet):
+    """ViewSet для модели курса."""
+
+    queryset = Course.objects.all()
+    serializer_class = CourseSerializer
+    pagination_class = MaterialsPagination
+    # ... остальной код
+
+
+class LessonListView(generics.ListAPIView):
+    """Список уроков."""
+
+    queryset = Lesson.objects.all()
+    serializer_class = LessonSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = MaterialsPagination
