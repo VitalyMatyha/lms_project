@@ -1,9 +1,12 @@
 from rest_framework import viewsets, generics
-from rest_framework.permissions import IsAuthenticated
-from .models import Course, Lesson
 from .serializers import CourseSerializer, LessonSerializer
 from .permissions import IsModer, IsOwner
-
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
+from .models import Course, Lesson, Subscription
+from .paginators import MaterialsPagination
 
 class CourseViewSet(viewsets.ModelViewSet):
     """
@@ -77,3 +80,46 @@ class LessonDeleteView(generics.DestroyAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
     permission_classes = [IsAuthenticated, IsOwner]
+
+
+class SubscriptionView(APIView):
+    """
+    Управление подпиской на курс.
+    POST — подписывает или отписывает пользователя от курса.
+    """
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, *args, **kwargs):
+        user = self.request.user
+        course_id = self.request.data.get('course_id')
+        course_item = get_object_or_404(Course, pk=course_id)
+
+        subs_item = Subscription.objects.filter(user=user, course=course_item)
+
+        if subs_item.exists():
+            subs_item.delete()
+            message = 'подписка удалена'
+        else:
+            Subscription.objects.create(user=user, course=course_item)
+            message = 'подписка добавлена'
+
+        return Response({"message": message})
+
+
+class CourseViewSet(viewsets.ModelViewSet):
+    """ViewSet для модели курса."""
+
+    queryset = Course.objects.all()
+    serializer_class = CourseSerializer
+    pagination_class = MaterialsPagination
+    # ... остальной код
+
+
+class LessonListView(generics.ListAPIView):
+    """Список уроков."""
+
+    queryset = Lesson.objects.all()
+    serializer_class = LessonSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = MaterialsPagination
