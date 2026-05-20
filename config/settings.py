@@ -127,3 +127,6 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'API для системы управления обучением',
     'VERSION': '1.0.0',
 }
+
+
+STRIPE_API_KEY = os.getenv('STRIPE_API_KEY')

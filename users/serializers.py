@@ -45,3 +45,11 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             avatar=validated_data.get('avatar'),
         )
         return user
+
+
+class PaymentCreateSerializer(serializers.ModelSerializer):
+    """Сериализатор для создания платежа с интеграцией Stripe."""
+
+    class Meta:
+        model = Payment
+        fields = ['course', 'lesson', 'amount', 'payment_method']
