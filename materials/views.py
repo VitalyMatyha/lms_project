@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from .models import Course, Lesson, Subscription
 from .paginators import MaterialsPagination
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 class CourseViewSet(viewsets.ModelViewSet):
     """
@@ -83,18 +84,19 @@ class LessonDeleteView(generics.DestroyAPIView):
 
 
 class SubscriptionView(APIView):
-    """
-    Управление подпиской на курс.
-    POST — подписывает или отписывает пользователя от курса.
-    """
+    """Управление подпиской на курс."""
 
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        summary='Подписка/отписка от курса',
+        request={'application/json': {'type': 'object', 'properties': {'course_id': {'type': 'integer'}}}},
+        responses={200: {'type': 'object', 'properties': {'message': {'type': 'string'}}}},
+    )
     def post(self, *args, **kwargs):
         user = self.request.user
         course_id = self.request.data.get('course_id')
         course_item = get_object_or_404(Course, pk=course_id)
-
         subs_item = Subscription.objects.filter(user=user, course=course_item)
 
         if subs_item.exists():
