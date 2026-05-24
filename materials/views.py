@@ -8,6 +8,8 @@ from django.shortcuts import get_object_or_404
 from .models import Course, Lesson, Subscription
 from .paginators import MaterialsPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter
+from .tasks import send_course_update_email
+
 
 class CourseViewSet(viewsets.ModelViewSet):
     """
@@ -109,13 +111,34 @@ class SubscriptionView(APIView):
         return Response({"message": message})
 
 
+
 class CourseViewSet(viewsets.ModelViewSet):
     """ViewSet для модели курса."""
 
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
     pagination_class = MaterialsPagination
-    # ... остальной код
+
+    def get_permissions(self):
+        if self.action == 'create':
+            self.permission_classes = [IsAuthenticated, ~IsModer]
+        elif self.action == 'destroy':
+            self.permission_classes = [IsAuthenticated, IsOwner]
+        elif self.action in ['update', 'partial_update', 'retrieve']:
+            self.permission_classes = [IsAuthenticated, IsModer | IsOwner]
+        else:
+            self.permission_classes = [IsAuthenticated]
+        return [permission() for permission in self.permission_classes]
+
+    def perform_create(self, serializer):
+        """Привязываем курс к авторизованному пользователю."""
+        serializer.save(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        """После обновления курса отправляем письма подписчикам."""
+        course = serializer.save()
+        # Вызываем задачу асинхронно
+        send_course_update_email.delay(course.pk)
 
 
 class LessonListView(generics.ListAPIView):

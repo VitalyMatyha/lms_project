@@ -16,6 +16,7 @@ class Course(models.Model):
         related_name='courses',
         verbose_name='Владелец'
     )
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
 
     class Meta:
         verbose_name = 'Курс'
@@ -23,7 +24,6 @@ class Course(models.Model):
 
     def __str__(self):
         return self.title
-
 
 class Lesson(models.Model):
     """Модель урока."""
