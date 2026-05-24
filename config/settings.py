@@ -1,6 +1,8 @@
 from pathlib import Path
 from dotenv import load_dotenv
 import os
+from celery.schedules import crontab
+
 
 # Явно указываем путь к .env файлу
 load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / '.env')
@@ -40,6 +42,7 @@ INSTALLED_APPS = [
     'materials',
     'django_filters',
     'drf_spectacular',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -130,3 +133,26 @@ SPECTACULAR_SETTINGS = {
 
 
 STRIPE_API_KEY = os.getenv('STRIPE_API_KEY')
+
+
+# Celery
+CELERY_BROKER_URL = os.getenv('REDIS_URL')
+CELERY_RESULT_BACKEND = os.getenv('REDIS_URL')
+CELERY_TIMEZONE = 'UTC'  # должен совпадать с TIME_ZONE
+
+# Email
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = True
+
+
+CELERY_BEAT_SCHEDULE = {
+    # Проверка неактивных пользователей — каждый день в полночь
+    'block-inactive-users': {
+        'task': 'users.tasks.block_inactive_users',
+        'schedule': crontab(hour=0, minute=0),
+    },
+}
