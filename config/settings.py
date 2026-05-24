@@ -1,6 +1,8 @@
 from pathlib import Path
 from dotenv import load_dotenv
 import os
+from celery.schedules import crontab
+
 
 # Явно указываем путь к .env файлу
 load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / '.env')
@@ -145,3 +147,12 @@ EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = True
+
+
+CELERY_BEAT_SCHEDULE = {
+    # Проверка неактивных пользователей — каждый день в полночь
+    'block-inactive-users': {
+        'task': 'users.tasks.block_inactive_users',
+        'schedule': crontab(hour=0, minute=0),
+    },
+}
