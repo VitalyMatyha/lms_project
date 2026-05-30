@@ -1,0 +1,11 @@
+[
+  {
+    "model": "materials.course",
+    "pk": 1,
+    "fields": {
+      "title": "Курс по Python",
+      "preview": null,
+      "description": "Базовый курс по Python разработке"
+    }
+  }
+]

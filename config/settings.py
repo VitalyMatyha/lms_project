@@ -1,12 +1,15 @@
 from pathlib import Path
 from dotenv import load_dotenv
 import os
+from celery.schedules import crontab
 
-load_dotenv()
+
+# Явно указываем путь к .env файлу
+load_dotenv(dotenv_path=Path(__file__).resolve().parent.parent / '.env')
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = 'django-insecure-gb1o@4(_cac56)ev_@b-(us!jt2_)t_4&5e3$59_te1()z_7by'
 
 DEBUG = True
 
@@ -37,6 +40,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'users',
     'materials',
+    'django_filters',
+    'drf_spectacular',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -106,3 +112,47 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 AUTH_USER_MODEL = 'users.User'
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',  # все эндпоинты закрыты по умолчанию
+    ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'LMS API',
+    'DESCRIPTION': 'API для системы управления обучением',
+    'VERSION': '1.0.0',
+}
+
+
+STRIPE_API_KEY = os.getenv('STRIPE_API_KEY')
+
+
+# Celery
+CELERY_BROKER_URL = os.getenv('REDIS_URL')
+CELERY_RESULT_BACKEND = os.getenv('REDIS_URL')
+CELERY_TIMEZONE = 'UTC'  # должен совпадать с TIME_ZONE
+
+# Email
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = True
+
+
+CELERY_BEAT_SCHEDULE = {
+    # Проверка неактивных пользователей — каждый день в полночь
+    'block-inactive-users': {
+        'task': 'users.tasks.block_inactive_users',
+        'schedule': crontab(hour=0, minute=0),
+    },
+}
