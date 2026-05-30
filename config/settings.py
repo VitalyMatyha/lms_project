@@ -13,7 +13,7 @@ SECRET_KEY = 'django-insecure-gb1o@4(_cac56)ev_@b-(us!jt2_)t_4&5e3$59_te1()z_7by
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['158.160.7.108', 'localhost', '127.0.0.1']
 
 # База данных
 DATABASES = {
